@@ -1,3 +1,4 @@
+import os
 import subprocess
 from flask import Flask, render_template, request
 
@@ -14,11 +15,11 @@ def download_song():
         return "Please provide a valid Spotify URL."
     
     try:
-        # Run spotdl to download the audio
         subprocess.run(['spotdl', song_url], check=True)
         return "Download completed successfully!"
     except Exception as e:
         return f"An error occurred: {str(e)}"
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
