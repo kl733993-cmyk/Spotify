@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Downloader</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 10px;
+            color: #1DB954; /* Spotify Green */
+        }
+        p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus {
+            border-color: #1DB954;
+        }
+        button {
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            background: #1DB954;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #1aa34a;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Spotify Downloader</h2>
+        <p>Paste your track or playlist link below</p>
+        
+        <form action="/download" method="POST">
+            <input type="text" name="url" placeholder="https://open.spotify.com/track/..." required autocomplete="off">
+            <button type="submit">Download Audio</button>
+        </form>
+    </div>
+
+</body>
+</html>
