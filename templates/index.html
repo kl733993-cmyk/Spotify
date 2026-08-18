@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify Downloader</title>
+    <title>Spotify Downloader - Live Terminal</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -17,34 +17,30 @@
         }
         .container {
             background: #ffffff;
-            padding: 40px;
+            padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
             text-align: center;
         }
         h2 {
-            margin-bottom: 10px;
-            color: #1DB954; /* Spotify Green */
+            margin-bottom: 5px;
+            color: #1DB954;
         }
         p {
             color: #666;
-            font-size: 14px;
-            margin-bottom: 25px;
+            font-size: 13px;
+            margin-bottom: 20px;
         }
         input[type="text"] {
             width: 100%;
-            padding: 12px 15px;
+            padding: 12px;
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 14px;
             box-sizing: border-box;
             outline: none;
-            transition: border-color 0.2s;
-        }
-        input[type="text"]:focus {
-            border-color: #1DB954;
         }
         button {
             width: 100%;
@@ -57,10 +53,23 @@
             border-radius: 6px;
             font-size: 15px;
             cursor: pointer;
-            transition: background 0.2s;
         }
         button:hover {
             background: #1aa34a;
+        }
+        #log {
+            margin-top: 20px;
+            background: #000;
+            color: #00ff66;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            text-align: left;
+            height: 120px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            display: none;
         }
     </style>
 </head>
@@ -68,13 +77,54 @@
 
     <div class="container">
         <h2>Spotify Downloader</h2>
-        <p>Paste your track or playlist link below</p>
+        <p>Live Processing Status Tracker</p>
         
-        <form action="/download" method="POST">
-            <input type="text" name="url" placeholder="https://open.spotify.com/track/..." required autocomplete="off">
-            <button type="submit">Download Audio</button>
+        <form id="downloadForm">
+            <input type="text" id="url" name="url" placeholder="https://open.spotify.com/track/..." required autocomplete="off">
+            <button type="submit" id="subBtn">Start Processing</button>
         </form>
+
+        <div id="log"></div>
     </div>
+
+    <script>
+        const form = document.getElementById('downloadForm');
+        const logBox = document.getElementById('log');
+        const subBtn = document.getElementById('subBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const urlVal = document.getElementById('url').value;
+            
+            logBox.style.display = 'block';
+            logBox.textContent = "[*] Connecting to server...\n";
+            subBtn.disabled = true;
+            subBtn.textContent = "Processing...";
+
+            try {
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'url=' + encodeURIComponent(urlVal)
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    logBox.textContent += decoder.decode(value, { stream: true });
+                    logBox.scrollTop = logBox.scrollHeight;
+                }
+            } catch (err) {
+                logBox.textContent += "\n[-] Connection failed: " + err;
+            } finally {
+                subBtn.disabled = false;
+                subBtn.textContent = "Start Processing";
+            }
+        });
+    </script>
 
 </body>
 </html>
