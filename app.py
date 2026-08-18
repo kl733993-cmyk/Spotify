@@ -1,6 +1,8 @@
 import os
 import subprocess
-from flask import Flask, render_template, request
+import glob
+import shutil
+from flask import Flask, render_template, request, send_file, Response
 
 app = Flask(__name__)
 
@@ -14,11 +16,41 @@ def download_song():
     if not song_url:
         return "Please provide a valid Spotify URL."
     
-    try:
-        subprocess.run(['spotdl', song_url], check=True)
-        return "Download completed successfully!"
-    except Exception as e:
-        return f"An error occurred: {str(e)}"
+    def generate():
+        yield "[-] Initializing download process...\n"
+        
+        # Purane files aur folders saaf karein
+        for f in glob.glob("*.mp3"):
+            os.remove(f)
+        for d in glob.glob("downloaded_playlist"):
+            shutil.rmtree(d, ignore_errors=True)
+            
+        yield "[*] Fetching audio streams from Spotify via spotdl...\n"
+        
+        try:
+            # spotdl run karein
+            process = subprocess.Popen(
+                ['spotdl', song_url],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True
+            )
+            
+            for line in process.stdout:
+                yield f"{line}"
+                
+            process.wait()
+            
+            if process.returncode == 0:
+                yield "\n[+] Download completed successfully on server!\n"
+                yield "[*] Preparing file for your device..."
+            else:
+                yield "\n[-] Error during download process."
+                
+        except Exception as e:
+            yield f"\n[-] System Error: {str(e)}"
+
+    return Response(generate(), mimetype='text/plain')
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
