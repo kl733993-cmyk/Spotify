@@ -2,7 +2,7 @@ import os
 import subprocess
 import glob
 import shutil
-from flask import Flask, render_template, request, send_file, Response
+from flask import Flask, render_template, request, Response
 
 app = Flask(__name__)
 
@@ -19,18 +19,18 @@ def download_song():
     def generate():
         yield "[-] Initializing download process...\n"
         
-        # Purane files aur folders saaf karein
+        # Purane saare mp3 files hata do
         for f in glob.glob("*.mp3"):
             os.remove(f)
         for d in glob.glob("downloaded_playlist"):
             shutil.rmtree(d, ignore_errors=True)
             
-        yield "[*] Fetching audio streams from Spotify via spotdl...\n"
+        yield "[*] Fetching audio streams via spotdl...\n"
         
         try:
-            # spotdl run karein
+            # spotdl command with better provider fallback
             process = subprocess.Popen(
-                ['spotdl', song_url],
+                ['spotdl', '--audio-provider', 'youtube-music', song_url],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True
@@ -43,9 +43,8 @@ def download_song():
             
             if process.returncode == 0:
                 yield "\n[+] Download completed successfully on server!\n"
-                yield "[*] Preparing file for your device..."
             else:
-                yield "\n[-] Error during download process."
+                yield "\n[-] Error: Could not download the song. Try another link."
                 
         except Exception as e:
             yield f"\n[-] System Error: {str(e)}"
